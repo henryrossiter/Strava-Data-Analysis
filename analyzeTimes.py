@@ -13,19 +13,27 @@ def getListOfStartHours(segmentID):
     numpy.savetxt(newFileName,startHourList)
     return(startHourList)
 
-
-def plotTime(startPercent, endPercent):
+# takes an array of items to plot, each item in format: [{segment id},{end pct}]
+def plotTime(records):
 
     startTimeList = []
-    for record in records:
-        startTimeList.append(getListOfStartHours(record))
+    for segmentID in records:
+        seekedFileName = str(segmentID[0])+'.txt'
+        hourArr = numpy.loadtxt(seekedFileName)
+        stopInd = int(len(hourArr)*segmentID[1]*.01)
+        hourArr = hourArr[:stopInd]
+        startTimeList.append(hourArr)
+        print(hourArr)
 
     fig, ax = pyplot.subplots()
     maxStartTime = max([max(sublist) for sublist in startTimeList])
     minStartTime = min([min(sublist) for sublist in startTimeList])
-    num_bins = maxStartTime-minStartTime
+    num_bins = int(maxStartTime-minStartTime)
+    print(num_bins)
     n, bins, patches = pyplot.hist(startTimeList, num_bins, rwidth=.8, density=True, color=['#fc4c02','#000000','#555555'], alpha=0.8, edgecolor='#000000')
 
+
+    ax.set_title('Three Sisters: New York, NY')
     ax.set_xlabel('Activity Start Hour')
     ax.set_ylabel('Fraction of Efforts')
     ax.set_xticks([5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21])
@@ -35,7 +43,9 @@ def plotTime(startPercent, endPercent):
     ax.set_ylim(bottom = 0, top = .64)
     ax.grid(True, which='major', alpha=.6, linestyle='-')
     ax.grid(True, which='minor', alpha=.2, linestyle='-')
-    ax.legend(['Top 1% Efforts', 'Top 10% Efforts','Top 30% Efforts'])
+    ax.legend(['Top 1% Efforts', 'Top 10% Efforts','Top 50% Efforts'])
     #ax.tick_params(labelcolor='r', labelsize='medium', width=3)
 
     pyplot.show()
+
+plotTime([['648048',1],['648048',10],['648048',50]])
